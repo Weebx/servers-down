@@ -20,6 +20,8 @@ FORCE_MAINTENANCE = "false"
 #   DOMAIN           — твой корневой домен
 #   ORIGIN_IP        — IP-адрес основного сервера
 #   FALLBACK_TARGET  — CNAME-цель GitHub Pages (вида <org>.github.io)
+#   PROBE_URL        — прямой HTTP(S) health-check приложения на отдельном hostname
+#                      основного сервера; без него проверяется только TCP-порт
 #   ADMIN_SECRET     — (по желанию) твой пароль для просмотра /status?secret=...
 #   TG_BOT_TOKEN     — (по желанию) токен Telegram-бота
 #   TG_CHAT_ID       — (по желанию) твой Telegram ID

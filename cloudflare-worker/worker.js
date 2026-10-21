@@ -7,7 +7,9 @@
  *
  * Как работает:
  *   1. Запускается по Cron-расписанию (например, раз в 3 минуты: каждые 3 мин).
- *   2. Делает 1 лёгкую проверку TCP-порта основного сервера (без нагрузки на сайт/БД).
+ *   2. Проверяет HTTP health-check (`PROBE_URL`) либо, если он не задан, TCP-порт.
+ *      Для обнаружения остановки Docker/приложения нужен именно HTTP health-check:
+ *      открытый порт 443 говорит лишь о том, что кто-то ещё принимает TCP-соединения.
  *   3. Если 3 проверки подряд с паузой 5 сек не прошли — переключает корневую запись `@`
  *      на CNAME резервной страницы (DNS only / серое облачко, TTL 60 сек).
  *   4. Пока сервер выключен — ничего лишнего не трогает и не спамит уведомлениями.
@@ -93,7 +95,14 @@ function sleep(ms) {
 
 /**
  * Разовая лёгкая проверка доступности основного сервера.
- * По умолчанию открывает TCP-соединение к ORIGIN_IP:ORIGIN_PORT и сразу закрывает сокет.
+ *
+ * Если задан PROBE_URL, делает HEAD-запрос и считает здоровым только ответ 2xx.
+ * Редиректы, 4xx и 5xx (включая 502/503/504 от Coolify/прокси) — это сбой.
+ * PROBE_URL должен вести на отдельный hostname основного сервера, а не на корневой
+ * домен: после переключения DNS корневой домен обслуживает уже GitHub Pages.
+ *
+ * Без PROBE_URL открывает TCP-соединение к ORIGIN_IP:ORIGIN_PORT. Такой режим
+ * обнаруживает отказ всего сервера/порта, но НЕ остановку Docker за работающим прокси.
  */
 export async function probeOriginOnce(cfg) {
   const startedAt = Date.now();
@@ -108,15 +117,17 @@ export async function probeOriginOnce(cfg) {
         signal: controller.signal,
         headers: { "User-Agent": "Failover-Watchdog/1.0" },
       });
-      const ok = res.status > 0 && res.status < 520;
+      const ok = res.status >= 200 && res.status < 300;
       return {
         ok,
+        probeType: "http",
         latencyMs: Date.now() - startedAt,
         detail: `HTTP ${res.status}`,
       };
     } catch (err) {
       return {
         ok: false,
+        probeType: "http",
         latencyMs: Date.now() - startedAt,
         error: err?.message || String(err),
       };
@@ -151,12 +162,14 @@ export async function probeOriginOnce(cfg) {
 
     return {
       ok: true,
+      probeType: "tcp",
       latencyMs: Date.now() - startedAt,
-      detail: "TCP port open",
+      detail: "TCP port open (HTTP/app not checked)",
     };
   } catch (err) {
     return {
       ok: false,
+      probeType: "tcp",
       latencyMs: Date.now() - startedAt,
       error: err?.message || String(err),
     };
