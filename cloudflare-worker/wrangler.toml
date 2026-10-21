@@ -1,0 +1,25 @@
+name = "failover-watchdog"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+# Расписание проверки: раз в 3 минуты (можно поставить "*/5 * * * *").
+[triggers]
+crons = ["*/3 * * * *"]
+
+[vars]
+ORIGIN_PORT = "443"
+DNS_TTL = "60"
+PROBE_TIMEOUT_MS = "4500"
+FAIL_CONFIRM_RETRIES = "3"
+RECOVER_CONFIRM_CHECKS = "2"
+FORCE_MAINTENANCE = "false"
+
+# Все чувствительные данные хранятся ТОЛЬКО в приватных Secrets внутри Cloudflare
+# (Settings -> Variables and Secrets -> Add -> Secret), НЕ в Git:
+#   CF_API_TOKEN     — API-токен Cloudflare (Zone -> DNS -> Edit только для своей зоны)
+#   DOMAIN           — твой корневой домен
+#   ORIGIN_IP        — IP-адрес основного сервера
+#   FALLBACK_TARGET  — CNAME-цель GitHub Pages (вида <org>.github.io)
+#   ADMIN_SECRET     — (по желанию) твой пароль для просмотра /status?secret=...
+#   TG_BOT_TOKEN     — (по желанию) токен Telegram-бота
+#   TG_CHAT_ID       — (по желанию) твой Telegram ID
