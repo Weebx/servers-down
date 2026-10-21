@@ -54,6 +54,8 @@
     --panel: rgba(24, 24, 27, 0.72);
     --panel-border: rgba(255, 255, 255, 0.10);
     --primary: #f97316;
+    --online: #10b981;
+    --online-bright: #34d399;
     --logo-orange: #F17C51;
     --text: #f4f4f5;
     --muted: #a1a1aa;
@@ -455,6 +457,86 @@
     line-height: 1.5;
   }
 
+  /* Кнопка прямого входа (показывается, когда сервер уже работает) */
+  .btn-enter {
+    display: none;
+    background: linear-gradient(135deg, #34d399, #10b981);
+    color: #052e16;
+    box-shadow: 0 10px 26px rgba(16, 185, 129, 0.35);
+    order: -1;
+  }
+  .btn-enter:hover {
+    filter: brightness(1.08);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(16, 185, 129, 0.5);
+  }
+
+  @keyframes spinIcon {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .btn.is-checking svg {
+    animation: spinIcon 0.9s linear infinite;
+  }
+
+  /* --- Состояние «Всё ок — сервер уже в сети, можно заходить» --- */
+  body.is-online .dot::before,
+  body.is-online .dot::after {
+    background: var(--online-bright);
+  }
+  body.is-online .orb-center {
+    background: radial-gradient(circle, rgba(16,185,129,0.22) 0%, rgba(52,211,153,0.10) 42%, transparent 70%);
+  }
+  body.is-online .orb-bottom {
+    background: radial-gradient(circle, rgba(16,185,129,0.26) 0%, transparent 65%);
+  }
+  body.is-online .statusline {
+    border-color: rgba(52, 211, 153, 0.45);
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--online-bright);
+  }
+  body.is-online h1 .accent {
+    background: linear-gradient(90deg, #6ee7b7, #34d399, #10b981);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  body.is-online .panel {
+    border-color: rgba(52, 211, 153, 0.28);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55), 0 0 36px rgba(16, 185, 129, 0.10);
+  }
+  body.is-online .panel-row .v .accent {
+    color: var(--online-bright);
+  }
+  body.is-online .art-glow {
+    background: linear-gradient(90deg, rgba(16,185,129,0.34), rgba(52,211,153,0.22), rgba(16,185,129,0.34));
+  }
+  body.is-online .art-top p {
+    color: var(--online-bright);
+  }
+  body.is-online .art-dots i.on {
+    background: var(--online-bright);
+  }
+  body.is-online .art-caption .cursor {
+    background: var(--online-bright);
+  }
+  body.is-online .btn-enter {
+    display: inline-flex;
+  }
+  body.is-online .btn-primary {
+    background: rgba(24, 24, 27, 0.8);
+    border-color: var(--panel-border);
+    color: #e4e4e7;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  }
+  body.is-online .btn-primary:hover {
+    color: #fff;
+    border-color: rgba(52, 211, 153, 0.45);
+  }
+  body.is-online #checkBtn {
+    display: none;
+  }
+
   @media (max-width: 900px) {
     main.grid {
       grid-template-columns: 1fr;
@@ -481,42 +563,46 @@
   <div class="orb orb-center"></div>
   <div class="orb orb-top"></div>
   <div class="orb orb-bottom"></div>
-  <div class="watermark"><span>503</span></div>
+  <div class="watermark"><span id="watermarkCode">503</span></div>
 </div>
 
 <header class="topbar">
   <a class="wordmark" href="https://weeb-x.com/" rel="noopener noreferrer">Weeb<span class="x">x</span></a>
-  <div class="topbar-right"><span class="dot" aria-hidden="true"></span>Disaster mode · Pages</div>
+  <div class="topbar-right"><span class="dot" aria-hidden="true"></span><span id="topbarText">Disaster mode · Pages</span></div>
 </header>
 
 <main class="grid">
   <section class="info">
-    <div class="statusline"><span class="dot" aria-hidden="true"></span>Технический перерыв</div>
+    <div class="statusline"><span class="dot" aria-hidden="true"></span><span id="statusText">Технический перерыв</span></div>
 
-    <h1>Мы не умерли — сервер ушёл <span class="accent">на техобслуживание</span></h1>
+    <h1 id="mainTitle">Мы не умерли — сервер ушёл <span class="accent">на техобслуживание</span></h1>
 
-    <p class="lead">
+    <p class="lead" id="leadText">
       Команда уже чинит всё, что сломалось. <b>Ваш прогресс, карты, монеты и подписки</b>
       в полной безопасности — ничего не потеряно. Объявление о рестарте появится в Telegram.
     </p>
 
-    <noscript>Таймер на странице работает только с включённым JavaScript — сама страница ничего не проверяет.</noscript>
+    <noscript>Таймер и автопроверка сервера работают только с включённым JavaScript.</noscript>
 
     <div class="panel" aria-label="Статус">
-      <div class="panel-row"><span class="k">Статус</span><span class="v"><span class="accent">SERVER DOWN</span> · весь сервер лежит</span></div>
+      <div class="panel-row"><span class="k">Статус</span><span class="v" id="panelStatus"><span class="accent">SERVER DOWN</span> · весь сервер лежит</span></div>
       <div class="panel-row"><span class="k">Прогресс игроков</span><span class="v">сохранён на серверах</span></div>
       <div class="panel-row"><span class="k">Экран открыт</span><span class="v"><span class="accent" id="since">00:00</span></span></div>
-      <div class="panel-row"><span class="k">Когда заработает</span><span class="v">сообщим в <span class="accent">Telegram</span></span></div>
+      <div class="panel-row"><span class="k">Когда заработает</span><span class="v" id="panelEta">сообщим в <span class="accent">Telegram</span></span></div>
     </div>
 
     <div class="cta-row">
+      <a class="btn btn-enter" id="enterBtn" href="https://weeb-x.com/">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        <span id="enterLabel">Войти на сайт</span>
+      </a>
       <a class="btn btn-primary" href="https://t.me/evangelion_chat" target="_blank" rel="noopener noreferrer">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.938 4.6l-3.072 14.476c-.231 1.02-.836 1.274-1.694.793l-4.683-3.45-2.26 2.174c-.25.25-.46.46-.943.46l.337-4.77L18.04 6.626c.376-.336-.083-.523-.584-.187l-9.462 5.956-4.074-1.274c-.886-.278-.903-.886.184-1.312l15.92-6.138c.737-.278 1.382.185 1.913.83z"/></svg>
         Новости о рестарте
       </a>
-      <a class="btn btn-ghost" href="https://weeb-x.com" target="_blank" rel="noopener noreferrer">
+      <a class="btn btn-ghost" id="checkBtn" href="https://weeb-x.com">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
-        Открыть сайт
+        <span id="checkLabel">Проверить снова</span>
       </a>
     </div>
 
@@ -547,7 +633,7 @@
     <div class="art-card">
       <img src="assets/maintenance-girl.png" alt="">
       <div class="shade"></div>
-      <div class="art-top"><span class="dot"></span><p>Уже чиним</p></div>
+      <div class="art-top"><span class="dot"></span><p id="artStatus">Уже чиним</p></div>
       <div class="art-dots"><i></i><i></i><i class="on"></i></div>
       <div class="art-caption">WEEBX<span class="cursor"></span></div>
     </div>
@@ -563,18 +649,231 @@
 <script>
 (function () {
   "use strict";
-  // Вариант «весь сервер умер» (GitHub Pages). Автопробки нет и не должно быть:
-  // DNS уже переключён на Pages, а проверять жив ли VPS отсюда невозможно
-  // (weeb-x.com временно указывает сюда же). Трафик в Cloudflare возвращают
-  // вручную, когда сервер восстановят — после этого обычный reload открывает сайт.
+
+  var SITE_URL = "https://weeb-x.com/";
+  var API_PROBE_URL = "https://api.weeb-x.com/";
+  var PAGE_MARKER = "ERR_MNT_W72";
+  var POLL_INTERVAL_MS = 45000;
+  var DNS_WAIT_RETRY_MS = 12000;
+
   var sinceEl = document.getElementById("since");
+  var topbarTextEl = document.getElementById("topbarText");
+  var statusTextEl = document.getElementById("statusText");
+  var mainTitleEl = document.getElementById("mainTitle");
+  var leadTextEl = document.getElementById("leadText");
+  var panelStatusEl = document.getElementById("panelStatus");
+  var panelEtaEl = document.getElementById("panelEta");
+  var enterBtnEl = document.getElementById("enterBtn");
+  var enterLabelEl = document.getElementById("enterLabel");
+  var checkBtnEl = document.getElementById("checkBtn");
+  var checkLabelEl = document.getElementById("checkLabel");
+  var artStatusEl = document.getElementById("artStatus");
+  var watermarkCodeEl = document.getElementById("watermarkCode");
+
   var openedAt = Date.now();
+  var isOnline = false;
+  var isChecking = false;
+  var waitingForDnsSwitch = false;
+  var lastCheckAt = 0;
+
   function pad(n) { return (n < 10 ? "0" : "") + n; }
   function elapsed() {
     var s = Math.max(0, Math.floor((Date.now() - openedAt) / 1000));
     return pad(Math.floor(s / 60)) + ":" + pad(s % 60);
   }
   setInterval(function () { if (sinceEl) sinceEl.textContent = elapsed(); }, 1000);
+
+  // Проверка 1: отдаёт ли текущий домен уже настоящий сайт вместо этой заглушки
+  function checkSameOriginSite() {
+    var host = window.location.hostname;
+    if (host !== "weeb-x.com" && host !== "www.weeb-x.com") {
+      return Promise.resolve(false);
+    }
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, 4500);
+    return fetch("/?_live=" + Date.now(), {
+      method: "GET",
+      cache: "no-store",
+      credentials: "omit",
+      headers: { "Pragma": "no-cache" },
+      signal: ctrl.signal
+    })
+      .then(function (res) {
+        clearTimeout(timer);
+        if (!res.ok) return false;
+        return res.text().then(function (html) {
+          return html.indexOf(PAGE_MARKER) === -1;
+        });
+      })
+      .catch(function () {
+        clearTimeout(timer);
+        return false;
+      });
+  }
+
+  // Проверка 2: отвечает ли бэкенд-сервер напрямую (даже если браузер всё ещё видит старый DNS заглушки)
+  function checkBackendServer() {
+    var ctrl1 = new AbortController();
+    var t1 = setTimeout(function () { ctrl1.abort(); }, 4500);
+    return fetch(API_PROBE_URL + "?_ping=" + Date.now(), {
+      method: "GET",
+      mode: "cors",
+      cache: "no-store",
+      credentials: "omit",
+      signal: ctrl1.signal
+    })
+      .then(function (res) {
+        clearTimeout(t1);
+        return res.status > 0 && res.status < 500;
+      })
+      .catch(function () {
+        clearTimeout(t1);
+        var ctrl2 = new AbortController();
+        var t2 = setTimeout(function () { ctrl2.abort(); }, 4000);
+        return fetch(API_PROBE_URL + "?_ping=" + Date.now(), {
+          method: "HEAD",
+          mode: "no-cors",
+          cache: "no-store",
+          signal: ctrl2.signal
+        })
+          .then(function () {
+            clearTimeout(t2);
+            return true;
+          })
+          .catch(function () {
+            clearTimeout(t2);
+            return false;
+          });
+      });
+  }
+
+  function renderOnlineState(directSiteReady) {
+    isOnline = true;
+    document.body.classList.add("is-online");
+    document.title = "✅ Всё ок — можно заходить! · Weebx";
+
+    if (watermarkCodeEl) watermarkCodeEl.textContent = "OK";
+    if (topbarTextEl) topbarTextEl.textContent = "System online · Ready";
+    if (statusTextEl) statusTextEl.textContent = "Всё ок · сервер в сети";
+    if (mainTitleEl) {
+      mainTitleEl.innerHTML = 'Всё ок — <span class="accent">сайт снова работает!</span>';
+    }
+    if (leadTextEl) {
+      leadTextEl.innerHTML =
+        "Сервер уже в строю и работает в обычном режиме — <b>можно спокойно заходить</b>. Нажмите кнопку ниже, чтобы перейти на сайт.";
+    }
+    if (panelStatusEl) {
+      panelStatusEl.innerHTML = '<span class="accent">ONLINE</span> · всё ок, можно заходить';
+    }
+    if (panelEtaEl) {
+      panelEtaEl.innerHTML = directSiteReady
+        ? '<span class="accent">вход открыт прямо сейчас</span>'
+        : '<span class="accent">сервер работает · обновляется DNS</span>';
+    }
+    if (artStatusEl) artStatusEl.textContent = "Сайт работает";
+  }
+
+  function runLiveProbe(manualClick) {
+    if (isChecking) return;
+    isChecking = true;
+    lastCheckAt = Date.now();
+
+    if (manualClick && checkBtnEl && checkLabelEl) {
+      checkBtnEl.classList.add("is-checking");
+      checkLabelEl.textContent = "Проверяем…";
+    }
+
+    Promise.all([checkSameOriginSite(), checkBackendServer()])
+      .then(function (results) {
+        var siteReady = results[0];
+        var apiReady = results[1];
+
+        if (siteReady || apiReady) {
+          renderOnlineState(siteReady);
+          if (waitingForDnsSwitch && siteReady) {
+            window.location.replace(SITE_URL + "?v=" + Date.now());
+          }
+          return;
+        }
+
+        if (manualClick && checkLabelEl) {
+          checkLabelEl.textContent = "Пока на техработах";
+          setTimeout(function () {
+            if (!isOnline && checkLabelEl) checkLabelEl.textContent = "Проверить снова";
+          }, 2500);
+        }
+      })
+      .finally(function () {
+        isChecking = false;
+        if (checkBtnEl) checkBtnEl.classList.remove("is-checking");
+      });
+  }
+
+  // Нажатие «Проверить снова» пока идут техработы
+  if (checkBtnEl) {
+    checkBtnEl.addEventListener("click", function (e) {
+      e.preventDefault();
+      runLiveProbe(true);
+    });
+  }
+
+  // Нажатие зелёной кнопки «Войти на сайт»
+  if (enterBtnEl) {
+    enterBtnEl.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (enterLabelEl) enterLabelEl.textContent = "Открываем сайт…";
+
+      checkSameOriginSite().then(function (siteReady) {
+        var host = window.location.hostname;
+        // Если DNS уже смотрит на живой сайт (или страницу открыли не с основного домена) — сразу переходим
+        if (siteReady || (host !== "weeb-x.com" && host !== "www.weeb-x.com")) {
+          window.location.replace(SITE_URL + "?v=" + Date.now());
+          return;
+        }
+
+        // Если сервер уже работает, но у провайдера/браузера ещё старый кэш DNS (~1–2 мин) —
+        // честно пишем об этом и автоматически перекинем пользователя, как только кэш обновится
+        waitingForDnsSwitch = true;
+        if (enterLabelEl) enterLabelEl.textContent = "Ждём обновления DNS…";
+        if (panelEtaEl) {
+          panelEtaEl.innerHTML = '<span class="accent">обновляется кэш DNS (~1 мин) · откроем сами</span>';
+        }
+        setTimeout(function retryUntilSwitched() {
+          checkSameOriginSite().then(function (readyNow) {
+            if (readyNow) {
+              window.location.replace(SITE_URL + "?v=" + Date.now());
+            } else {
+              setTimeout(retryUntilSwitched, DNS_WAIT_RETRY_MS);
+            }
+          });
+        }, DNS_WAIT_RETRY_MS);
+      });
+    });
+  }
+
+  // Режимы быстрого предпросмотра (?preview=online / ?preview=down) для визуальной проверки без выключения ПК
+  if (window.location.search.indexOf("preview=online") !== -1) {
+    renderOnlineState(true);
+    return;
+  }
+  if (window.location.search.indexOf("preview=down") !== -1) {
+    return;
+  }
+
+  // Мягкая проверка сразу при открытии + раз в 45 секунд только на активной вкладке
+  setTimeout(function () { runLiveProbe(false); }, 600);
+
+  setInterval(function () {
+    if (!document.hidden && !isOnline) {
+      runLiveProbe(false);
+    }
+  }, POLL_INTERVAL_MS);
+
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden && !isOnline && Date.now() - lastCheckAt > 15000) {
+      runLiveProbe(false);
+    }
+  });
 })();
 </script>
 </body>
