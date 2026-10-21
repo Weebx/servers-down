@@ -141,6 +141,24 @@ DNS в Cloudflare кэшируется на TTL записи (300 с), брау�
 3. Прокси Cloudflare (оранжевое облако) для `@` держи **выключенным**: с ним
    GitHub видит не тот Host, и начинаются петли редиректов / `526`.
 
+Проверка, что сертификат готов (появилось поле `https_certificate` — выпустился):
+
+```bash
+gh api repos/Weebx/servers-down/pages \
+  --jq '{https_enforced, cert: .https_certificate.state, domains: .https_certificate.domains}'
+```
+
+Пока сертификата нет, поля `cert`/`domains` будут `null`, но страница уже открывается
+по `http://`. Когда браузер показывает замок на `https://weeb-x.com` — заходи в
+Settings → Pages и поставь галочку **Enforce HTTPS**, чтобы http больше не работал.
+
+Чек-лист «почему сертификат не выпускается» (проверено 2026-10-21 — всё чисто):
+
+- `CAA` на домене отсутствует → LE не заблокирован.
+- `AAAA` у `www` указывает на GitHub (`2606:50c0:8000::153`…), а не на VPS.
+- хвостов `TXT _acme-challenge` нет.
+- прокси Cloudflare выключен, `pending_domain_unverified_at` = `null` (домен подтверждён).
+
 ### Если доступа к аккаунту Cloudflare нет
 
 Важно: зона `weeb-x.com` **делегирована на Cloudflare** независимо от того, есть у тебя
